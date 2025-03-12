@@ -27,7 +27,7 @@ function Home() {
       </label>
       <hr />
       <label>
-        Lastname: <input value={lastname} name="mylastname" onChange={(e)=> setFirstname(e.target.value)} />
+        Lastname: <input value={lastname} name="mylastname" onChange={(e)=> setLastname(e.target.value)} />
      </label>
       <hr />
       <label>
