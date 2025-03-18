@@ -22,5 +22,5 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src"]
+  "include": ["src", "src/S3.ts", "src/S3.js", "../lamda-trigger/index.mjs"]
 }

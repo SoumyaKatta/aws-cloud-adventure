@@ -1,70 +1,65 @@
-import { useState } from "react";
-// import AWS from "aws-sdk";
-// const s3 = new AWS.S3();
+import  { useState } from 'react';
+import AWS from 'aws-sdk'; // Import entire SDK (optional)
+import S3 from 'aws-sdk/clients/s3'; // Import only the S3 client
+import ponyfill from 'web-streams-polyfill';
+
+
+// import './App.css';
+import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 
 function Home() {
-  const [image, setImage] = useState("");
-  const [previewUrl, setPreviewUrl] = useState("");
-  const [firstname, setFirstname] = useState("");
-  const [lastname, setLastname] = useState("");
+  const [userImage, setUser] = useState<File | null>(null);
 
-  const handleImageChange = (event: any) => {
-    const file = event.target.files && event.target.files[0]; // Check if a file is selected
+  const uploadFile = async () => {
+    if (!userImage) {
+      alert("choose the image file.");
+      return;
+    }
 
-    if (file) {
-      setImage(file);
-      setPreviewUrl(URL.createObjectURL(file)); // Create a preview URL
+    const S3_BUCKET = "original-images-bucket2";
+    const REGION = "ap-south-1";
+    const s3 = new S3Client({
+      region: REGION,
+      credentials: {
+        accessKeyId: "AKIA6ELKOA7CY23SG4FN",
+        secretAccessKey: "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",
+      },
+      requestChecksumCalculation: "WHEN_REQUIRED"
+    });
+
+    const params = {
+      Bucket: S3_BUCKET,
+      Key: userImage.name, 
+      Body: userImage,
+    };
+
+    try {
+      const csvParam = new PutObjectCommand(params);
+      const data = await s3.send(csvParam);
+      console.log("Response obtained", data);
+    } catch (err) {
+      console.log("Error in uploading to S3 bucket", err);
+      throw err;
     }
   };
-  // const handleSubmit = async (e: any) => {
-  //   e.preventDefault();
-  //   const fileName = e.target.files;
-  //   const params = {
-  //     Bucket: "my-bucket",
-  //     Key: fileName,
-  //     Body: e.target.files,
-  //     ACL: "public-read",
-  //   };
-  //   try {
-  //     // const uploadedFile = await s3.upload(params).promise();
-  //     console.log(uploadedFile);
-  //   } catch (err) {
-  //     console.error(err);
-  //   }
-  // };
 
-  //   const handleSubmit = (event) => {
-  //     event.preventDefault();
-  //     // TODO: Implement file upload logic
-  //   };
+
+  const handleFileChange = (e:any) => {
+    const file = e.target.files?.[0];
+    console.log(file)
+    if (file) {
+      setUser(file);
+    }
+  };
+
   return (
     <>
-      <h1>Welcome to the Home screen</h1>
-      <label>
-        firstname:{" "}
-        <input
-          value={firstname}
-          name="myfirstname"
-          onChange={(e) => setFirstname(e.target.value)}
-        />
-      </label>
-      <hr />
-      <label>
-        Lastname:{" "}
-        <input
-          value={lastname}
-          name="mylastname"
-          onChange={(e) => setLastname(e.target.value)}
-        />
-      </label>
-      <hr />
-        <label>
-          profile image:
-          <input type="file" accept="image/*" onChange={handleImageChange} />
-        </label>
-        <button type="submit">Upload</button>
-      {previewUrl && <img src={previewUrl} alt="Preview" />}
+      <div className="">
+        <input type="file" required onChange={handleFileChange} />
+        <button onClick={uploadFile}>Upload File</button>
+      </div>
     </>
   );
 }
+
 export default Home;
